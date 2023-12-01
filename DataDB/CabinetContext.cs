@@ -25,32 +25,20 @@ public partial class CabinetContext : DbContext
     {
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => new { e.Id, e.Email }).HasName("PK_users_id_email");
+            entity.HasKey(e => e.Id).HasName("PK__users__3214EC07E7A22126");
 
             entity.ToTable("users");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedOnAdd()
-                .HasColumnName("id");
-            entity.Property(e => e.Email)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("email");
-            entity.Property(e => e.Nom)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("nom");
-            entity.Property(e => e.Password)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-            entity.Property(e => e.Prenom)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("prenom");
-            entity.Property(e => e.Telephone)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("telephone");
+            entity.HasIndex(e => e.Email, "UQ__users__A9D1053495140FD7").IsUnique();
+
+            entity.Property(e => e.Email).HasMaxLength(255);
+            entity.Property(e => e.Nom).HasMaxLength(255);
+            entity.Property(e => e.Password).HasMaxLength(255);
+            entity.Property(e => e.Prenom).HasMaxLength(255);
+            entity.Property(e => e.Rôle)
+                .HasDefaultValueSql("((0))")
+                .HasColumnName("rôle");
+            entity.Property(e => e.Telephone).HasMaxLength(255);
         });
 
         OnModelCreatingPartial(modelBuilder);

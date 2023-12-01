@@ -11,9 +11,11 @@ public partial class User
 
     public string? Nom { get; set; }
 
-    public string Email { get; set; } = null!;
+    public string? Email { get; set; }
 
     public string? Password { get; set; }
 
     public string? Telephone { get; set; }
+
+    public int? Rôle { get; set; }
 }
