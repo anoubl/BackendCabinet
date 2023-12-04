@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BackendCabinet.DataDB;
+using System.Diagnostics;
 
 namespace BackendCabinet.Controllers
 {
@@ -90,7 +91,21 @@ namespace BackendCabinet.Controllers
               return Problem("Entity set 'CabinetContext.Users'  is null.");
           }
             _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (UserExists(user.Id))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
@@ -115,6 +130,51 @@ namespace BackendCabinet.Controllers
             return NoContent();
         }
 
+
+      
+     [HttpPost("login")]
+   public async Task<ActionResult<User>> Login(string email, string password)
+        {
+            try
+            {
+                // Check if the Users DbSet is null
+                if (_context.Users == null)
+                {
+                    return Problem("Entity set 'CabinetContext.Users' is null.");
+                }
+                Debug.WriteLine("data:" + email + " " + password);
+                // Assuming User has properties like Email and Password
+                var existingUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
+
+                if (existingUser == null)
+                {
+                    // User not found or credentials are incorrect
+                    return BadRequest("Invalid email or password");
+                }
+
+                // TODO: Implement your authentication logic here
+                var userResponseModel = new
+                {
+                    Id = existingUser.Id,
+                    Prenom = existingUser.Prenom,
+                    Nom = existingUser.Nom,
+                    Rôle = existingUser.Rôle
+                };
+
+
+                // For simplicity, returning the authenticated user
+                return Ok(userResponseModel);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                // It's a good practice to log the exception details for troubleshooting
+                // You can use a logging framework or log to a file, database, etc.
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return StatusCode(500, "Internal server error");
+            }
+        }
         private bool UserExists(int id)
         {
             return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
