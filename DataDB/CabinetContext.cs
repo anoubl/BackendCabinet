@@ -18,8 +18,7 @@ public partial class CabinetContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=SQL8006.site4now.net;Initial Catalog=db_aa26b5_cabinetmedical;User Id=db_aa26b5_cabinetmedical_admin;Password=AHMEd26@");
+        => optionsBuilder.UseSqlServer("Data Source=SQL8006.site4now.net;Initial Catalog=db_aa26b5_cabinetmedical;User Id=db_aa26b5_cabinetmedical_admin;Password=AHMEd26@;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,6 +30,10 @@ public partial class CabinetContext : DbContext
 
             entity.HasIndex(e => e.Email, "UQ__users__AB6E6164D01FFCC2").IsUnique();
 
+            entity.Property(e => e.Adresse)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.DateNaissance).HasColumnType("date");
             entity.Property(e => e.Email)
                 .HasMaxLength(20)
                 .IsUnicode(false)

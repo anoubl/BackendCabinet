@@ -18,4 +18,8 @@ public partial class User
     public string? Password { get; set; }
 
     public int? Rôle { get; set; }
+
+    public DateTime? DateNaissance { get; set; }
+
+    public string? Adresse { get; set; }
 }

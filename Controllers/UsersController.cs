@@ -91,21 +91,7 @@ namespace BackendCabinet.Controllers
               return Problem("Entity set 'CabinetContext.Users'  is null.");
           }
             _context.Users.Add(user);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (UserExists(user.Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
@@ -114,26 +100,21 @@ namespace BackendCabinet.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            if (_context.Users == null)
-            {
-                return NotFound();
-            }
             var user = await _context.Users.FindAsync(id);
+
             if (user == null)
             {
-                return NotFound();
+                return NotFound("User not found");
             }
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok("User deleted successfully");
         }
 
-
-      
-     [HttpPost("login")]
-   public async Task<ActionResult<User>> Login(string email, string password)
+        [HttpPost("login")]
+        public async Task<ActionResult<object>> Login([FromBody] User model)
         {
             try
             {
@@ -142,10 +123,18 @@ namespace BackendCabinet.Controllers
                 {
                     return Problem("Entity set 'CabinetContext.Users' is null.");
                 }
-                Debug.WriteLine("data:" + email + " " + password);
+
+                Debug.WriteLine($"Data: {model.Email} {model.Password}");
+
+                // Validate model state
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
                 // Assuming User has properties like Email and Password
                 var existingUser = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
+                    .FirstOrDefaultAsync(u => u.Email == model.Email && u.Password == model.Password);
 
                 if (existingUser == null)
                 {
@@ -154,16 +143,21 @@ namespace BackendCabinet.Controllers
                 }
 
                 // TODO: Implement your authentication logic here
+                // For simplicity, returning only necessary user details
                 var userResponseModel = new
                 {
                     Id = existingUser.Id,
                     Prenom = existingUser.Prenom,
                     Nom = existingUser.Nom,
-                    Rôle = existingUser.Rôle
+                    Rôle = existingUser.Rôle,
+                    Adresse = existingUser.Adresse,
+                    DateNaissance=existingUser.DateNaissance,
                 };
 
+                // For security reasons, you should not return the password in the response
+                // Also, consider using a token-based authentication mechanism for better security
 
-                // For simplicity, returning the authenticated user
+                // Return the authenticated user details
                 return Ok(userResponseModel);
             }
             catch (Exception ex)
@@ -175,6 +169,8 @@ namespace BackendCabinet.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+
         private bool UserExists(int id)
         {
             return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
