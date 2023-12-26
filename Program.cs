@@ -22,7 +22,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowLocalhost3000",
         builder =>
         {
-            builder.WithOrigins("http://localhost:3000")
+            builder.WithOrigins("http://localhost:3000", "https://cabinetmedical.vercel.app")
                    .AllowAnyHeader()
                    .AllowAnyMethod();
         });

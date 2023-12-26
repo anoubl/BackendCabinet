@@ -15,13 +15,41 @@ public partial class CabinetContext : DbContext
     {
     }
 
+    public virtual DbSet<RendezVou> RendezVous { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
+
+    public virtual DbSet<Userprofille> Userprofilles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Data Source=SQL8006.site4now.net;Initial Catalog=db_aa26b5_cabinetmedical;User Id=db_aa26b5_cabinetmedical_admin;Password=AHMEd26@;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<RendezVou>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__RendezVo__3213E83F30F83BB4");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Daterendezvous)
+                .HasColumnType("date")
+                .HasColumnName("daterendezvous");
+            entity.Property(e => e.Description)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("description");
+     
+            entity.Property(e => e.Patientemail)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("patientemail");
+            entity.Property(e => e.Plage)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("plage");
+
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__users__3214EC0752702939");
@@ -35,7 +63,7 @@ public partial class CabinetContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.DateNaissance).HasColumnType("date");
             entity.Property(e => e.Email)
-                .HasMaxLength(20)
+                .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("email");
             entity.Property(e => e.Nom)
@@ -57,6 +85,21 @@ public partial class CabinetContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("telephone");
+        });
+
+        modelBuilder.Entity<Userprofille>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__userprof__3213E83FAA08D9F4");
+
+            entity.ToTable("userprofille");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Imag)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("imag");
+            entity.Property(e => e.Userid).HasColumnName("userid");
+
         });
 
         OnModelCreatingPartial(modelBuilder);

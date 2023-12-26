@@ -25,10 +25,10 @@ namespace BackendCabinet.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-          if (_context.Users == null)
-          {
-              return NotFound();
-          }
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
             return await _context.Users.ToListAsync();
         }
 
@@ -36,10 +36,10 @@ namespace BackendCabinet.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-          if (_context.Users == null)
-          {
-              return NotFound();
-          }
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
             var user = await _context.Users.FindAsync(id);
 
             if (user == null)
@@ -86,15 +86,23 @@ namespace BackendCabinet.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
-          if (_context.Users == null)
-          {
-              return Problem("Entity set 'CabinetContext.Users'  is null.");
-          }
+            if (_context.Users == null)
+            {
+                return Problem("Entity set 'CabinetContext.Users' is null.");
+            }
+
+            // Check if the email already exists
+            if (_context.Users.Any(u => u.Email == user.Email))
+            {
+                return BadRequest("User with the provided email already exists.");
+            }
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
+
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
@@ -151,7 +159,7 @@ namespace BackendCabinet.Controllers
                     Nom = existingUser.Nom,
                     Rôle = existingUser.Rôle,
                     Adresse = existingUser.Adresse,
-                    DateNaissance=existingUser.DateNaissance,
+                    DateNaissance = existingUser.DateNaissance,
                 };
 
                 // For security reasons, you should not return the password in the response
@@ -170,6 +178,34 @@ namespace BackendCabinet.Controllers
             }
         }
 
+        [HttpPut("validate/{email}")]
+        public async Task<ActionResult<string>> ValidatePatient(string email)
+        {
+            try
+            {
+                // Find the user based on the email
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+                if (user == null)
+                {
+                    return NotFound($"User with email {email} not found");
+                }
+
+                // Update the user's state to 1
+                user.Etat = 1;
+
+                // Save changes to the database
+                await _context.SaveChangesAsync();
+
+                return Ok($"User with email {email} successfully validated");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle it appropriately
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
 
         private bool UserExists(int id)
         {
@@ -177,3 +213,4 @@ namespace BackendCabinet.Controllers
         }
     }
 }
+

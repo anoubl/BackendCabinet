@@ -13,7 +13,7 @@ public partial class User
 
     public string? Telephone { get; set; }
 
-    public string? Email { get; set; }
+    public string Email { get; set; } = null!;
 
     public string? Password { get; set; }
 
@@ -22,4 +22,7 @@ public partial class User
     public DateTime? DateNaissance { get; set; }
 
     public string? Adresse { get; set; }
+    public int? Etat { get; set; }
+
+
 }
