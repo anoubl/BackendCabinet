@@ -15,6 +15,10 @@ public partial class CabinetContext : DbContext
     {
     }
 
+    public virtual DbSet<Dossier> Dossiers { get; set; }
+
+    public virtual DbSet<DossierDetail> DossierDetails { get; set; }
+
     public virtual DbSet<RendezVou> RendezVous { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
@@ -26,6 +30,37 @@ public partial class CabinetContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Dossier>(entity =>
+        {
+            entity.HasKey(e => e.DossierId).HasName("PK__Dossier__CABB1D90EDBDCF0C");
+
+            entity.ToTable("Dossier");
+
+            entity.Property(e => e.DateCreation)
+                .HasColumnType("date")
+                .HasColumnName("Date_creation");
+            entity.Property(e => e.PatDescription)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("pat_description");
+            entity.Property(e => e.PatientId).HasColumnName("patientId");
+
+          
+        });
+
+        modelBuilder.Entity<DossierDetail>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__DossierD__3213E83F32E1B5DC");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.DossierId).HasColumnName("dossierId");
+            entity.Property(e => e.Image)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("image");
+
+        });
+
         modelBuilder.Entity<RendezVou>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__RendezVo__3213E83F30F83BB4");
@@ -38,7 +73,6 @@ public partial class CabinetContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("description");
-     
             entity.Property(e => e.Patientemail)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -48,6 +82,7 @@ public partial class CabinetContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("plage");
 
+           
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -66,6 +101,7 @@ public partial class CabinetContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("email");
+            entity.Property(e => e.Etat).HasColumnName("etat");
             entity.Property(e => e.Nom)
                 .HasMaxLength(20)
                 .IsUnicode(false)
@@ -100,6 +136,7 @@ public partial class CabinetContext : DbContext
                 .HasColumnName("imag");
             entity.Property(e => e.Userid).HasColumnName("userid");
 
+          
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -22,7 +22,7 @@ public partial class User
     public DateTime? DateNaissance { get; set; }
 
     public string? Adresse { get; set; }
-    public int? Etat { get; set; }
 
+    public int? Etat { get; set; }
 
 }
