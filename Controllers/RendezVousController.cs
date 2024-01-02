@@ -127,8 +127,20 @@ namespace BackendCabinet.Controllers
 
             return NoContent();
         }
-      
-       
+
+        [HttpPut("validate/{email}")]
+        public IActionResult validate(string email)
+        {
+            if (_context.RendezVous == null)
+            {
+                return NotFound();
+            }
+            var rdv = _context.RendezVous.Where((rdv) => rdv.Patientemail == email).First();
+            rdv.Etat = 1;
+            _context.SaveChanges();
+            return Ok(rdv);
+           
+        }
         private bool RendezVouExists(int id)
         {
             return (_context.RendezVous?.Any(e => e.Id == id)).GetValueOrDefault();
