@@ -25,6 +25,8 @@ public partial class CabinetContext : DbContext
 
     public virtual DbSet<Userprofille> Userprofilles { get; set; }
 
+    public virtual DbSet<UsersDetail> UsersDetails { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Data Source=SQL8006.site4now.net;Initial Catalog=db_aa26b5_cabinetmedical;User Id=db_aa26b5_cabinetmedical_admin;Password=AHMEd26@;TrustServerCertificate=True");
 
@@ -45,7 +47,7 @@ public partial class CabinetContext : DbContext
                 .HasColumnName("pat_description");
             entity.Property(e => e.PatientId).HasColumnName("patientId");
 
-          
+
         });
 
         modelBuilder.Entity<DossierDetail>(entity =>
@@ -73,6 +75,9 @@ public partial class CabinetContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("description");
+            entity.Property(e => e.Etat)
+                .HasDefaultValueSql("((0))")
+                .HasColumnName("etat");
             entity.Property(e => e.Patientemail)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -82,7 +87,6 @@ public partial class CabinetContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("plage");
 
-           
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -136,7 +140,28 @@ public partial class CabinetContext : DbContext
                 .HasColumnName("imag");
             entity.Property(e => e.Userid).HasColumnName("userid");
 
-          
+        });
+
+        modelBuilder.Entity<UsersDetail>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__usersDet__3213E83F0E9906D1");
+
+            entity.ToTable("usersDetails");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Experience).HasColumnName("experience");
+            entity.Property(e => e.Heures).HasColumnName("heures");
+            entity.Property(e => e.Salaire).HasColumnName("salaire");
+            entity.Property(e => e.Specialite)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("specialite");
+            entity.Property(e => e.Universite)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("universite");
+            entity.Property(e => e.Userid).HasColumnName("userid");
+
         });
 
         OnModelCreatingPartial(modelBuilder);

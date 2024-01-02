@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BackendCabinet.DataDB;
 using System.Diagnostics;
+using System.Data;
 
 namespace BackendCabinet.Controllers
 {
@@ -206,7 +207,32 @@ namespace BackendCabinet.Controllers
             }
         }
 
+        [HttpGet("profille/{id}")]
+        public IActionResult profille(int id)
+        {
+            var userProfille = (from Users in _context.Users join userData in _context.UsersDetails on Users.Id equals userData.Userid where Users.Id == id select new
+            {
+                Prenom=Users.Prenom,
+                Nom= Users.Nom,
+                Salaire = userData.Salaire,
+                Telephone=Users.Telephone,
+                Rôle=Users.Rôle,
+                Heures=userData.Heures,
+                Universite=userData.Universite,
+                Experience= userData.Experience,
+                DateNaissance =Users.DateNaissance,
+                Specialite=userData.Specialite,
+                Adresse=Users.Adresse,
+                Email =Users.Email
 
+            }).ToList();
+
+            if(userProfille.Count > 0)
+            {
+                return Ok(userProfille);
+            }
+            return BadRequest($"no User found avec l'id ${id}");
+        }
         private bool UserExists(int id)
         {
             return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();

@@ -15,5 +15,6 @@ public partial class RendezVou
 
     public string? Patientemail { get; set; }
 
+    public int? Etat { get; set; }
 
 }

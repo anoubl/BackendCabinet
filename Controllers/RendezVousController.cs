@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BackendCabinet.DataDB;
+using Azure;
 
 namespace BackendCabinet.Controllers
 {
@@ -22,13 +23,25 @@ namespace BackendCabinet.Controllers
 
         // GET: api/RendezVous
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RendezVou>>> GetRendezVous()
+        public IActionResult GetRendezVous()
         {
           if (_context.RendezVous == null)
           {
               return NotFound();
           }
-            return await _context.RendezVous.ToListAsync();
+           var rendezvous = (from rdvs  in _context.RendezVous join users in _context.Users 
+                             on rdvs.Patientemail equals users.Email 
+                             select new
+                             {
+                                 patientName=users.Prenom + " " +users.Nom,
+                                 Daterendezvous=rdvs.Daterendezvous,
+                                 Plage=rdvs.Plage,
+                                 Etat= rdvs.Etat,
+                                 Patientemail = rdvs.Patientemail,
+                                 Description= rdvs.Description
+                             }
+                             ).ToList();
+            return Ok(rendezvous);
         }
 
         // GET: api/RendezVous/5

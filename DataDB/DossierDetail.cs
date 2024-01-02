@@ -11,5 +11,4 @@ public partial class DossierDetail
 
     public int? DossierId { get; set; }
 
-    public virtual Dossier? Dossier { get; set; }
 }
