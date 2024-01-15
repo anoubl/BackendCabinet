@@ -56,10 +56,7 @@ public partial class CabinetContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.DossierId).HasColumnName("dossierId");
-            entity.Property(e => e.Image)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("image");
+     
 
         });
 

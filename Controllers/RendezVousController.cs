@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BackendCabinet.DataDB;
 using Azure;
+using System.Xml.Linq;
 
 namespace BackendCabinet.Controllers
 {
@@ -33,12 +34,14 @@ namespace BackendCabinet.Controllers
                              on rdvs.Patientemail equals users.Email 
                              select new
                              {
+                                 Id=rdvs.Id,
                                  patientName=users.Prenom + " " +users.Nom,
                                  Daterendezvous=rdvs.Daterendezvous,
                                  Plage=rdvs.Plage,
                                  Etat= rdvs.Etat,
                                  Patientemail = rdvs.Patientemail,
-                                 Description= rdvs.Description
+                                 Description= rdvs.Description,
+                                 DocteurId = rdvs.DctrId
                              }
                              ).ToList();
             return Ok(rendezvous);
@@ -140,6 +143,61 @@ namespace BackendCabinet.Controllers
             _context.SaveChanges();
             return Ok(rdv);
            
+        }
+        [HttpGet("/Heures/{date}/{dctrId}")]
+        public IActionResult HeuresReserver(string date,int dctrId)
+        {
+            if (date == null || !DateTime.TryParse(date, out _))
+            {
+                return BadRequest("Invalid date format");
+            }
+
+            var parsedDate = DateTime.Parse(date).Date;  // Extracting the date part
+
+            var data = _context.RendezVous
+                .Where(element => element.Daterendezvous == parsedDate && element.DctrId == dctrId)
+                .Select(element => $"{element.Plage:hh\\:mm tt}")
+                .ToArray();
+
+            return Ok(data);
+        }
+        [HttpGet("/RendezVousParDocteur/{Id}")]
+        public IActionResult RendezVousDocteur(int Id)
+        {
+            if(Id==0)
+            {
+                return BadRequest("Id required");
+            }
+            var data = (from rdvs in _context.RendezVous
+                        join users in _context.Users
+                              on rdvs.Patientemail equals users.Email
+                        where rdvs.DctrId == Id
+                        select new
+                        {
+                            plage = rdvs.Plage,
+                            daterendezvous = rdvs.Daterendezvous,
+                            PatientName = users.Prenom + " " + users.Nom
+                        }).ToArray();
+            return Ok(data);
+        }
+        [HttpGet("/RendezVousPatient/{email}")]
+        public IActionResult RendezVousPatient(string email)
+        {
+            if (email == null)
+            {
+                return BadRequest("Id required");
+            }
+            var data = (from rdvs in _context.RendezVous
+                        join users in _context.Users
+                              on rdvs.Patientemail equals users.Email
+                        where rdvs.Patientemail == email
+                        select new
+                        {
+                            plage = rdvs.Plage,
+                            daterendezvous = rdvs.Daterendezvous,
+                            PatientName = users.Prenom + " " + users.Nom
+                        }).ToArray();
+            return Ok(data);
         }
         private bool RendezVouExists(int id)
         {

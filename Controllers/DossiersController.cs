@@ -22,32 +22,80 @@ namespace BackendCabinet.Controllers
 
         // GET: api/Dossiers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Dossier>>> GetDossiers()
+        public async Task<ActionResult<IEnumerable<object>>> GetDossiersWithExists()
         {
-          if (_context.Dossiers == null)
-          {
-              return NotFound();
-          }
-            return await _context.Dossiers.ToListAsync();
-        }
-
-        // GET: api/Dossiers/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Dossier>> GetDossier(int id)
-        {
-          if (_context.Dossiers == null)
-          {
-              return NotFound();
-          }
-            var dossier = await _context.Dossiers.FindAsync(id);
-
-            if (dossier == null)
+            if (_context.Dossiers == null)
             {
                 return NotFound();
             }
 
-            return dossier;
+            var dossiers = await _context.Dossiers.ToListAsync();
+
+            var result = dossiers.Select(dossier => new
+            {
+                // Include existing Dossier properties
+                dossier.DossierId,
+                dossier.PatientId,
+                dossier.DateCreation,
+                
+                // Add a new boolean field 'Exists' to the result
+                Exists = _context.Users.Any(u => u.Id == dossier.PatientId)
+            });
+
+            return Ok(result);
         }
+
+
+        // GET: api/Dossiers/5
+        [HttpGet("{id}")]
+        public ActionResult<Dossier> GetDossier(int id)
+        {
+            if (_context.Dossiers == null || id == 0)
+            {
+                return NotFound();
+            }
+
+            var data = _context.Dossiers
+                .Where(ds => ds.PatientId == id)
+                .Select(ds => new
+                {
+                    Message = "Les patients et leurs Dossiers Médicaux",
+                    DossierInformation = new
+                    {
+                        ds.DossierId,
+                        ds.PatientId,
+                        ds.DateCreation,
+                        ds.PatDescription
+                    },
+                    PatientInfo = _context.Users
+                        .Where(u => u.Id == ds.PatientId)
+                        .Select(u => new
+                        {
+                            u.Prenom,
+                            u.Nom,
+                            u.DateNaissance
+                        })
+                        .FirstOrDefault(),
+                    Consultations = _context.DossierDetails
+                        .Where(c => c.DossierId == ds.DossierId)
+                        .Select(c => new
+                        {
+                            c.Id,
+                            c.DossierId,
+                            c.Description,
+                            c.Total
+                            // Ajoutez d'autres propriétés de DossierDetails au besoin
+                        })
+                        .ToList()
+                })
+                .ToList();
+            if(data.Count > 0)
+            {
+                return Ok(data);
+            }
+            return NotFound();
+        }
+
 
         // PUT: api/Dossiers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -114,6 +162,8 @@ namespace BackendCabinet.Controllers
 
             return NoContent();
         }
+
+
 
         private bool DossierExists(int id)
         {
